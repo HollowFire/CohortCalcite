@@ -1,0 +1,525 @@
+options {
+    STATIC = false;
+    IGNORE_CASE = true;
+    UNICODE_INPUT = true;
+}
+
+
+PARSER_BEGIN(SqlCohortParserImpl)
+
+
+package org.apache.calcite.cohort.sql.parser.impl;
+
+import java.io.Reader;
+import java.io.StringReader;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.calcite.cohort.sql.*;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlCohortNode;
+
+
+
+/**
+ * SQL parser, generated from Parser.jj by JavaCC.
+ *
+ * <p>The public wrapper for this parser is {@link SqlParser}.
+ */
+public class SqlCohortParserImpl 
+{
+    
+}
+
+PARSER_END(SqlCohortParserImpl)
+
+	
+SqlNode SqlStmtEof() :
+{
+    SqlNode stmt;
+}
+{
+    stmt = SqlStmt() <EOF>
+    {
+        return stmt;
+    }
+}
+
+
+SqlNode SqlStmt() :
+{
+    SqlNode stmt;
+}
+{
+    (
+        stmt = SqlCohortSelect()
+    )
+    {
+        return stmt;
+    }
+}	
+	
+	
+	
+
+/**
+ * Production for cohort query
+ */
+CohortSelectNode SqlCohortSelect() :
+{
+	List<SqlNode> selectList;
+	final String fromClause;
+	final String birthFrom;
+	final List<SqlNode> birthFilter;
+	final List<SqlNode> ageFilter;
+	final List<String> cohortBy;
+}
+{
+	<CSELECT>
+	selectList = CohortSelectList()
+	(
+		<FROM> fromClause = CohortFromClause()
+		birthFrom = BirthFrom()
+		birthFilter = BirthFilterOpt()
+		ageFilter = AgeFilterOpt()
+		cohortBy = CohortBy()
+	|
+		E() {
+			fromClause = null;
+			birthFrom = null;
+			birthFilter = null;
+			ageFilter = null;
+			cohortBy = null;
+		}
+	)
+	{
+		return new CohortSelectNode(selectList, fromClause, birthFrom,
+									birthFilter, ageFilter, cohortBy);
+	}
+}
+
+
+List<SqlNode> CohortSelectList() :
+{
+    List<SqlNode> list = new ArrayList<SqlNode>();
+    SqlNode item;
+}
+{
+    item = CohortSelectItem() {list.add(item);}
+    ( <COMMA> item = CohortSelectItem() {list.add(item);} ) *
+    {
+        return list;
+    }
+}
+
+
+SqlNode CohortSelectItem() :
+{
+	SqlNode e;
+}
+{
+	e = CohortAggItem()
+	{ 
+		return e; 
+	}
+	|
+	e = CohortIdentifier()
+	{
+		return e;
+	}
+}
+
+SqlNode CohortAggItem() :
+{
+	CohortAggItemNode aggItem;
+	String type;
+	Token x, y;
+}
+{
+	type = CohortAggFunc()
+	{
+		aggItem = new CohortAggItemNode(type);
+	}
+	(
+		<LPAREN>
+		(
+			x = <IDENTIFIER>
+			{
+				if (x != null) {
+					aggItem.setFieldName(x.toString().trim());
+				}
+			}
+		)?
+		<RPAREN>
+	)?
+	(
+		<AS> y=<IDENTIFIER>
+		{
+			if (y !=null) {
+				aggItem.setAlias(y.toString().trim());
+			}
+		}
+	)?
+	{
+		return aggItem;
+	}
+		
+}
+
+String CohortAggFunc() :
+{
+	String name;
+}
+{
+	(
+		<COHORTSIZE> { name = "COHORTSIZE"; }
+	|	<AGE> { name = "AGE"; }
+	|	<AVG> { name = "AVG"; }
+	|	<MIN> { name = "MIN"; }
+	|	<MAX> { name = "MAX"; }
+	|	<SUM> { name = "SUM"; }
+	|	<USERCOUNT> { name = "USERCOUNT"; }
+	)
+	{ return name; }
+}
+
+SqlNode CohortIdentifier() :
+{
+	CohortIdentifierNode e;
+	Token x, y;
+}
+{
+	x = <IDENTIFIER> 
+	{
+		e = new CohortIdentifierNode(x.toString().trim());
+	}
+	(
+		<AS> y=<IDENTIFIER>
+		{
+			if (y != null) {
+				e.setAlias(y.toString().trim());
+			}
+		}
+	)?
+	{ return e; }	
+}
+
+
+
+
+String CohortFromClause() :
+{
+    Token e;
+}
+{
+    e = <IDENTIFIER>
+    {
+        return e.toString().trim();
+    }
+}
+
+
+String BirthFrom() :
+{
+	Token e;
+}
+{
+	<BIRTH> <FROM> <ACTION> <EQ>
+	e=<QUOTE_STRING>
+	{
+		return removeQuote(e.toString().trim());
+	}
+}
+
+List<SqlNode> BirthFilterOpt() :
+{
+	List<SqlNode> condition;
+}
+{
+    <AND> condition = CohortFilter()
+    {
+        return condition;
+    }
+    |
+    {
+        return null;
+    }
+}
+
+List<SqlNode> AgeFilterOpt() :
+{
+	List<SqlNode> condition;
+}
+{
+    <AGE> <ACTIVITIES> <IN> 
+	condition = CohortFilter()
+    {
+        return condition;
+    }
+    |
+    {
+        return null;
+    }
+}
+
+List<SqlNode> CohortFilter() :
+{
+	CohortFilterNode a, b;
+	List<SqlNode> filters = null;
+}
+{
+	a = SingleFilter() 
+	{
+		if (a != null) {
+			filters = new ArrayList<SqlNode>();
+			filters.add(a);
+		}
+	}
+	(
+		<AND>
+		b = SingleFilter()
+		{
+			if (filters == null) {
+				filters = new ArrayList<SqlNode>();
+			} else if (b != null) {
+				filters.add(b);
+			}
+		}
+	)*
+	{ return filters; }
+}
+
+
+CohortFilterNode SingleFilter() :
+{
+	CohortFilterNode filter;
+	List<String> list;
+	Token lhs, operator;
+	Token a, b;
+	String x;
+}
+{
+	lhs=<IDENTIFIER>
+	(
+		operator=<BETWEEN> a=<QUOTE_STRING> 
+							  <AND> b=<QUOTE_STRING>
+		{
+			filter = new CohortFilterNode(
+								operator.toString().toUpperCase().trim());
+			filter.setDim(lhs.toString().trim());
+			list = new ArrayList<String>();
+			if (a != null) list.add(removeQuote(a.toString().trim()));
+			if (b != null) list.add(removeQuote(b.toString().trim()));
+			filter.setValues(list);
+		}
+	|
+		(
+			operator=<IN> <LBRACKET> a=<QUOTE_STRING>
+			{
+				filter = new CohortFilterNode(
+						operator.toString().toUpperCase().trim());
+				filter.setDim(lhs.toString().trim());
+				list = new ArrayList<String>();
+				if (a != null) {
+					list.add(removeQuote(a.toString().trim()));
+				}
+			}
+			(
+				<COMMA>
+				b=<QUOTE_STRING>
+				{
+					if (b != null) {
+						list.add(removeQuote(b.toString().trim()));
+					}
+				}
+			)*
+			<RBRACKET>
+			{ 
+				filter.setValues(list);
+			}
+		)
+	|
+		x=BinaryOperator()
+		(
+			<BIRTH> <LPAREN> a=<IDENTIFIER> <RPAREN>
+			{
+				filter = new CohortFilterNode(x);
+				filter.setBirthFlag(true);
+				filter.setDim(lhs.toString().trim());
+				list = new ArrayList<String>();
+				list.add(a.toString().trim());
+				filter.setValues(list);
+			}
+		|
+		    (a=<QUOTE_STRING>)
+			{
+				filter = new CohortFilterNode(x);
+				filter.setBirthFlag(false);
+				filter.setDim(lhs.toString().trim());
+				list = new ArrayList<String>();
+				list.add(a.toString().trim());
+				filter.setValues(list);
+			}
+		)
+	
+	)
+	{ return filter; }
+}
+
+String BinaryOperator() : {}
+{
+	LOOKAHEAD(2)
+	 <EQ> { return "EQ"; }
+	|<LT> { return "LT"; }
+	|<GT> { return "GT"; }
+	|<LE> { return "LE"; }
+	|<GE> { return "GE"; }
+	|<NE> { return "NE"; }
+}
+	
+List<String> CohortBy() :
+{
+	Token x, y;
+	List<String> list;
+}
+{
+	<COHORT> <BY> x=<IDENTIFIER> 
+	{
+		list = new ArrayList<String>();
+		if (x != null) list.add(x.toString().trim());
+	}
+	(
+		<COMMA>
+		y=<IDENTIFIER>
+		{
+			if (y != null) list.add(y.toString().trim());
+		}
+	)*
+	{ return list; }
+}
+
+
+JAVACODE
+String removeQuote(String x) {
+	if (x == null) return x;
+	if (x.charAt(0) == '\'') x = x.substring(1);
+	if (x.charAt(x.length()-1) == '\'') x = x.substring(0, x.length()-1);
+	return x;
+}
+
+JAVACODE
+void E() {}
+
+
+
+SKIP :
+{
+    " "
+    | "\t"
+    | "\n"
+    | "\r"
+    | "\f"
+}
+	
+
+/* Keywords added to facilitate parsing of cohort queries. */
+TOKEN :
+{
+     < CSELECT: "CSELECT" >
+	|< FROM: "FROM" >
+	|< ACTION: "ACTION" >
+	|< BIRTH: "BIRTH" >
+	|< COHORT: "COHORT" >
+	|< BY: "BY" >
+	|< AGE: "AGE" >
+	|< AS: "AS" >
+	|< ACTIVITIES: "ACTIVITIES" >
+	|< IN: "IN" >
+	|< COHORTSIZE: "COHORTSIZE" >
+	|< USERCOUNT: "UserCount" >
+	|< MIN: "MIN" >
+	|< MAX: "MAX" >
+	|< AVG: "AVG" >
+	|< BETWEEN: "BETWEEN" >
+	|< SUM: "SUM" >
+	|< EQ: "=" >
+    |< GT: ">" >
+    |< LT: "<" >
+    |< LE: "<=" >
+    |< GE: ">=" >
+	|< NE: "!=" >
+	|< AND: "AND" >
+	|< OR: "OR" >
+	|< LPAREN: "(">
+    |< RPAREN: ")">
+    |< LBRACE: "{" >
+    |< RBRACE: "}" >
+    |< LBRACKET: "[" >
+    |< RBRACKET: "]" >
+    |< COMMA: "," >
+	
+	
+	|< IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
+	|
+	< #LETTER:
+    [
+        "\u0024",
+        "\u0041"-"\u005a",
+        "\u005f",
+        "\u0061"-"\u007a",
+        "\u00c0"-"\u00d6",
+        "\u00d8"-"\u00f6",
+        "\u00f8"-"\u00ff",
+        "\u0100"-"\u1fff",
+        "\u3040"-"\u318f",
+        "\u3300"-"\u337f",
+        "\u3400"-"\u3d2d",
+        "\u4e00"-"\u9fff",
+        "\uf900"-"\ufaff"
+    ]
+    >
+    |
+    < #DIGIT:
+    [
+        "\u0030"-"\u0039",
+        "\u0660"-"\u0669",
+        "\u06f0"-"\u06f9",
+        "\u0966"-"\u096f",
+        "\u09e6"-"\u09ef",
+        "\u0a66"-"\u0a6f",
+        "\u0ae6"-"\u0aef",
+        "\u0b66"-"\u0b6f",
+        "\u0be7"-"\u0bef",
+        "\u0c66"-"\u0c6f",
+        "\u0ce6"-"\u0cef",
+        "\u0d66"-"\u0d6f",
+        "\u0e50"-"\u0e59",
+        "\u0ed0"-"\u0ed9",
+        "\u1040"-"\u1049"
+    ]
+    >
+	
+	
+	
+	|< DOUBLE_QUOTE: "\"" >
+	|< DOUBLE_QUOTE_STRING: "\"" (<ESC_SEQ> | ~["\\","\""] )* "\"" >
+	|< QUOTE_STRING: "\'" (<ESC_SEQ> | ~["\\","\'"] )* "\'" >
+	|< #UNQUOTED_STRING: (<ESC_SEQ> | ~["\\","\'"] )* >
+	|< #ESC_SEQ: 
+			"\\" ("b"|"t"|"n"|"f"|"r"|"\""|"\'"|"\\")
+		|	<UNICODE_ESC>
+		|	<OCTAL_ESC>
+	 >
+	|< #OCTAL_ESC: 
+			"\\" ["0"-"3"] ["0"-"7"] ["0"-"7"]
+		|	"\\" ["0"-"7"] ["0"-"7"]
+		|	"\\" ["0"-"7"]
+	 >
+	|< #UNICODE_ESC: "\\" "u" <HEX_DIGIT> <HEX_DIGIT> <HEX_DIGIT> <HEX_DIGIT> >
+	|< #HEX_DIGIT: ["0"-"9","a"-"f","A"-"F"] >
+}
+
