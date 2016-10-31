@@ -310,7 +310,18 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
         Token lhs, operator;
         Token a, b;
         String x;
-    lhs = jj_consume_token(IDENTIFIER);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case ACTION:
+      lhs = jj_consume_token(ACTION);
+      break;
+    case IDENTIFIER:
+      lhs = jj_consume_token(IDENTIFIER);
+      break;
+    default:
+      jj_la1[11] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case BETWEEN:
       operator = jj_consume_token(BETWEEN);
@@ -343,7 +354,7 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
           ;
           break;
         default:
-          jj_la1[11] = jj_gen;
+          jj_la1[12] = jj_gen;
           break label_3;
         }
         jj_consume_token(COMMA);
@@ -385,13 +396,13 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
                                 filter.setValues(list);
         break;
       default:
-        jj_la1[12] = jj_gen;
+        jj_la1[13] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
     default:
-      jj_la1[13] = jj_gen;
+      jj_la1[14] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -426,7 +437,7 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
                 {if (true) return "NE";}
         break;
       default:
-        jj_la1[14] = jj_gen;
+        jj_la1[15] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -449,7 +460,7 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
         ;
         break;
       default:
-        jj_la1[15] = jj_gen;
+        jj_la1[16] = jj_gen;
         break label_4;
       }
       jj_consume_token(COMMA);
@@ -493,7 +504,7 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
   private Token jj_scanpos, jj_lastpos;
   private int jj_la;
   private int jj_gen;
-  final private int[] jj_la1 = new int[16];
+  final private int[] jj_la1 = new int[17];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -501,10 +512,10 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x80,0x0,0x5f1000,0x0,0x80000000,0x2000,0x5f1000,0x2000,0x20000000,0x1000,0x20000000,0x0,0x200,0x1fa08000,0x1f000000,0x0,};
+      jj_la1_0 = new int[] {0x80,0x0,0x5f1000,0x0,0x80000000,0x2000,0x5f1000,0x2000,0x20000000,0x1000,0x20000000,0x100,0x0,0x200,0x1fa08000,0x1f000000,0x0,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x0,0x20,0x40,0x40,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20,0x800,0x0,0x0,0x20,};
+      jj_la1_1 = new int[] {0x0,0x20,0x40,0x40,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40,0x20,0x800,0x0,0x0,0x20,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[1];
   private boolean jj_rescan = false;
@@ -521,7 +532,7 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 16; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 17; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -536,7 +547,7 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 16; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 17; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -547,7 +558,7 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 16; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 17; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -558,7 +569,7 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 16; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 17; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -568,7 +579,7 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 16; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 17; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -578,7 +589,7 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 16; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 17; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -695,7 +706,7 @@ public class SqlCohortParserImpl implements SqlCohortParserImplConstants {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 17; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {

@@ -303,7 +303,7 @@ CohortFilterNode SingleFilter() :
 	String x;
 }
 {
-	lhs=<IDENTIFIER>
+	(lhs=<ACTION>|lhs=<IDENTIFIER>)
 	(
 		operator=<BETWEEN> a=<QUOTE_STRING> 
 							  <AND> b=<QUOTE_STRING>
